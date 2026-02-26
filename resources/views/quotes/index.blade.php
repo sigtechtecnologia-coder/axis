@@ -39,6 +39,16 @@
                                             <a class="text-indigo-600 hover:text-indigo-800 font-semibold" href="{{ route('quotes.show', $q) }}">
                                                 {{ $q->number }}
                                             </a>
+                                            @php
+                                                $partners = $q->quoteServices->pluck('partner.name')->unique()->filter()->implode(', ');
+                                                $services = $q->quoteServices->pluck('service.name')->unique()->filter()->implode(', ');
+                                            @endphp
+                                            @if($partners)
+                                                <div class="text-xs text-gray-500 mt-0.5">Parceiros: {{ $partners }}</div>
+                                            @endif
+                                            @if($services)
+                                                <div class="text-xs text-gray-500 mt-0.5">Serviços: {{ $services }}</div>
+                                            @endif
                                         </td>
                                         <td class="px-4 py-3 text-sm text-gray-700">{{ $q->client?->display_name ?? '-' }}</td>
 
