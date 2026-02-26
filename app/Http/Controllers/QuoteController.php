@@ -16,7 +16,7 @@ class QuoteController extends Controller
     public function index()
     {
         $quotes = Quote::query()
-            ->with(['client', 'status'])
+            ->with(['client', 'status', 'quoteServices.service', 'quoteServices.partner'])
             ->orderByDesc('id')
             ->paginate(20);
 
