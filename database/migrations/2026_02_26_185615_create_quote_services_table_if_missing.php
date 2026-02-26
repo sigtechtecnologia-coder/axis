@@ -1,47 +1,34 @@
 <?php
 
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\LookupController;
-use App\Http\Controllers\PartnerController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\QuoteController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\StatusController;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-Route::get('/', function () {
-    return redirect()->route('dashboard');
-});
+return new class extends Migration {
+    public function up(): void
+    {
+        if (Schema::hasTable('quote_services')) {
+            return;
+        }
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+        Schema::create('quote_services', function (Blueprint $table) {
+            $table->id();
 
-Route::middleware('auth')->group(function () {
-    // --- Cadastros base ---
-    Route::resource('statuses', StatusController::class)->except(['show']);
-    Route::resource('clients', ClientController::class)->except(['show']);
+            $table->foreignId('quote_id')->constrained('quotes')->cascadeOnDelete();
 
-    // --- Propostas (internamente: quotes) ---
-    Route::resource('quotes', QuoteController::class);
+            $table->foreignId('service_id')->constrained('services');
+            $table->foreignId('partner_id')->constrained('partners');
 
-    // ✅ NOVO: Quick edit do status na listagem (/quotes)
-    Route::patch('quotes/{quote}/status', [QuoteController::class, 'updateStatus'])
-        ->name('quotes.update-status');
+            $table->decimal('price', 12, 2)->default(0);
 
-    // --- Serviços e Parceiros ---
-    Route::resource('services', ServiceController::class)->except(['show']);
-    Route::resource('partners', PartnerController::class)->except(['show']);
+            $table->timestamps();
 
-    // --- Lookups (autocomplete) ---
-    Route::get('/lookups/clients', [LookupController::class, 'clients'])->name('lookups.clients');
-    Route::get('/lookups/services', [LookupController::class, 'services'])->name('lookups.services');
-    Route::get('/lookups/partners', [LookupController::class, 'partners'])->name('lookups.partners');
+            $table->index('quote_id');
+        });
+    }
 
-    // --- Profile (Breeze) ---
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-require __DIR__ . '/auth.php';
+    public function down(): void
+    {
+        Schema::dropIfExists('quote_services');
+    }
+};

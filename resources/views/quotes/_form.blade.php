@@ -115,6 +115,8 @@
 
 <script>
 (function () {
+    if (window.__quoteFormInitialized) return;
+    window.__quoteFormInitialized = true;
     const services = @json($servicesList);
     const partners = @json($partnersList);
     const initialItems = @json($initialItems);
